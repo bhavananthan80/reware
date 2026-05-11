@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CampusCycle | ReUse Marketplace</title>
+  <link rel="stylesheet" href="/assets/styles/global.css" />
+  <link rel="stylesheet" href="/assets/styles/components.css" />
+  <link rel="stylesheet" href="/assets/styles/transitions.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="brand-title">CampusCycle</div><div class="brand-sub">REWARE | SDG12</div>
+      <div class="nav-group"><div class="nav-label">Overview</div><a class="nav-link" data-page="dashboard.html" data-nav href="/dashboard.html">Dashboard</a></div>
+      <div class="nav-group"><div class="nav-label">Modules</div><a class="nav-link" data-page="reware.html" data-nav href="/reware.html">ReUse Marketplace</a><a class="nav-link" data-page="academic-hub.html" data-nav href="/academic-hub.html">Academic Hub</a><a class="nav-link" data-page="lost-found.html" data-nav href="/lost-found.html">Lost & Found</a></div>
+      <div class="nav-group"><div class="nav-label">Account</div><a class="nav-link" data-page="profile.html" data-nav href="/profile.html">My Profile</a><a class="nav-link" href="#" id="logout-link">Logout</a></div>
+    </aside>
+    <main class="main">
+      <div class="topbar"><div><h1>ReUse Marketplace</h1><div class="muted" id="institution-header"></div></div><button id="toggle-upload" class="btn">+ List an Item</button></div>
+      <div class="card panel" id="upload-panel" style="display:none;margin-bottom:12px;">
+        <h3>Upload Used Item</h3>
+        <form id="market-form" class="form-grid">
+          <div><label>Title</label><input name="title" required /></div><div><label>Category</label><input name="category" placeholder="Calculator / Notes / Stationery" required /></div>
+          <div><label>Condition</label><select name="condition"><option>GOOD</option><option>LIKE NEW</option><option>FAIR</option></select></div><div><label>Price</label><input name="price" type="number" required /></div>
+          <div style="grid-column:1/-1;"><label>Description</label><textarea name="description"></textarea></div>
+          <div style="grid-column:1/-1;"><label>Image</label><input type="file" name="image" accept="image/*" /></div>
+          <div style="grid-column:1/-1;display:flex;justify-content:flex-end;"><button class="btn" type="submit">Upload Item</button></div>
+        </form>
+      </div>
+      <div class="chips"><button class="chip active" data-filter="all">All</button><button class="chip" data-filter="Textbooks">Textbooks</button><button class="chip" data-filter="Lab">Lab Equipment</button><button class="chip" data-filter="Calculator">Calculators</button><button class="chip" data-filter="Stationery">Stationery</button></div>
+      <section class="split-2" style="margin-bottom:14px;">
+        <div class="card panel">
+          <h3>Incoming requests</h3>
+          <p class="muted" style="margin-top:0;font-size:13px;">Buyers who want your listings. Accept and pick a campus meet point.</p>
+          <div id="incoming-requests"></div>
+        </div>
+        <div class="card panel">
+          <h3>My requests</h3>
+          <p class="muted" style="margin-top:0;font-size:13px;">Requests you sent. If accepted, your meet point appears here.</p>
+          <div id="outgoing-requests"></div>
+        </div>
+      </section>
+      <div class="cards-grid" id="market-grid"></div>
+    </main>
+  </div>
+
+  <div id="request-modal" class="modal-backdrop" role="dialog" aria-modal="true" style="display:none;">
+    <div class="modal card">
+      <h3 style="margin-top:0;">Request to buy</h3>
+      <p id="request-item-title" class="muted"></p>
+      <label>Message (optional)</label>
+      <textarea id="request-message" rows="3" placeholder="Hi, I am interested in this item..."></textarea>
+      <p id="request-modal-error" class="form-error"></p>
+      <div class="row" style="margin-top:12px;">
+        <button type="button" id="request-cancel" class="btn secondary">Cancel</button>
+        <button type="button" id="request-submit" class="btn">Send request</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="accept-modal" class="modal-backdrop" role="dialog" aria-modal="true" style="display:none;">
+    <div class="modal card">
+      <h3 style="margin-top:0;">Accept request</h3>
+      <p id="accept-buyer-line" class="muted"></p>
+      <label>Meeting place on campus</label>
+      <select id="accept-meeting-place"></select>
+      <label style="margin-top:8px; display:block;">Meeting Time</label>
+      <input type="time" id="accept-meeting-time" required style="width:100%; border-radius:4px; border:1px solid #ddd; padding:8px;" />
+      <p id="accept-modal-error" class="form-error"></p>
+      <div class="row" style="margin-top:12px;">
+        <button type="button" id="accept-cancel" class="btn secondary">Cancel</button>
+        <button type="button" id="accept-submit" class="btn">Confirm meet point</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/api.js"></script><script src="/assets/js/auth.js"></script><script src="/assets/js/layout.js"></script><script src="/assets/js/transitions.js"></script><script src="/assets/js/pages/reware.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+*.log
+.DS_Store
+Thumbs.db
+
+# Local data (do not publish student records / uploads)
+backend/data/db.json
+backend/uploads/*
+!backend/uploads/.gitkeep

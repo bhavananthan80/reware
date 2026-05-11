@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CampusCycle | Dashboard</title>
+  <link rel="stylesheet" href="/assets/styles/global.css" />
+  <link rel="stylesheet" href="/assets/styles/components.css" />
+  <link rel="stylesheet" href="/assets/styles/transitions.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="brand-title">CampusCycle</div>
+      <div class="brand-sub">REWARE | SDG12</div>
+      <div class="nav-group"><div class="nav-label">Overview</div><a class="nav-link" data-page="dashboard.html" data-nav href="/dashboard.html">Dashboard</a></div>
+      <div class="nav-group"><div class="nav-label">Modules</div><a class="nav-link" data-page="reware.html" data-nav href="/reware.html">ReUse Marketplace</a><a class="nav-link" data-page="academic-hub.html" data-nav href="/academic-hub.html">Academic Hub</a><a class="nav-link" data-page="lost-found.html" data-nav href="/lost-found.html">Lost & Found</a></div>
+      <div class="nav-group"><div class="nav-label">Account</div><a class="nav-link" data-page="profile.html" data-nav href="/profile.html">My Profile</a><a class="nav-link" href="#" id="logout-link">Logout</a></div>
+    </aside>
+    <main class="main">
+      <div class="topbar"><div><h1>Dashboard</h1><div class="muted" id="institution-header"></div></div><input class="search" placeholder="Search items, notes, reports" /></div>
+      <section class="grid-4" id="metrics"></section>
+      <section class="grid-2" style="margin-top:14px;">
+        <div class="card panel"><h3>Recent Activity</h3><div id="recent-activity"></div></div>
+        <div class="stack">
+          <div class="card panel"><h3>Your Sustainability Impact</h3><div id="impact"></div></div>
+          <div class="card panel"><h3>Quick Actions</h3><div class="split-2"><a data-nav href="/reware.html" class="btn secondary" style="text-decoration:none;text-align:center;">Sell Item</a><a data-nav href="/academic-hub.html" class="btn secondary" style="text-decoration:none;text-align:center;">Upload Notes</a><a data-nav href="/lost-found.html" class="btn secondary" style="text-decoration:none;text-align:center;">Report Lost</a><a data-nav href="/lost-found.html" class="btn secondary" style="text-decoration:none;text-align:center;">Report Found</a></div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="/assets/js/api.js"></script><script src="/assets/js/auth.js"></script><script src="/assets/js/layout.js"></script><script src="/assets/js/transitions.js"></script><script src="/assets/js/pages/dashboard.js"></script>
+</body>
+</html>

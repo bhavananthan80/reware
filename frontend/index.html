@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CampusCycle | Student Login</title>
+  <link rel="stylesheet" href="/assets/styles/global.css" />
+</head>
+<body class="auth-page">
+  <section class="auth-card" style="width:min(900px,92vw);padding:24px;">
+    <h2>Rajalakshmi Institute of Technogy</h2>
+    <h1 style="margin-top:4px;">REWARE Campus Cycle</h1>
+    <p class="muted">Student Login and Profile Onboarding</p>
+    <p class="muted" style="font-size:13px;margin-top:8px;">Only verified Rajalakshmi addresses are allowed, e.g. <strong>bhavananthan.250013@csbs.ritchennai.edu.in</strong> (your <code>dept.ritchennai.edu.in</code> email).</p>
+    <form id="login-form" class="form-grid" style="margin-top:14px;">
+      <div style="grid-column:1/-1;"><label>Student Email ID (college only)</label><input required name="email" type="email" autocomplete="email" placeholder="name.regno@csbs.ritchennai.edu.in" pattern=".+@.+\.ritchennai\.edu\.in" title="Must be your @*.ritchennai.edu.in college email" /></div>
+      <div><label>Student Name</label><input required name="name" /></div>
+      <div><label>Reg No</label><input required name="regNo" /></div>
+      <div><label>Department</label><input required name="department" /></div>
+      <div><label>Year</label><input required name="year" /></div>
+      <div><label>Semester</label><input required name="sem" /></div>
+      <div style="grid-column:1/-1;display:flex;justify-content:flex-end;">
+        <button class="btn" type="submit">Enter CampusCycle</button>
+      </div>
+    </form>
+    <p id="error-msg" style="color:#b73030;"></p>
+  </section>
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script>
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const payload = Object.fromEntries(formData.entries());
+      try {
+        const result = await api("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        localStorage.setItem("rewareToken", result.token);
+        setStudent(result.student);
+        window.location.href = "/dashboard.html";
+      } catch (error) {
+        document.getElementById("error-msg").textContent = error.message;
+      }
+    });
+  </script>
+</body>
+</html>
