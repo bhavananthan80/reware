@@ -1,0 +1,294 @@
+/* CampusCycle UI theme — matches marketplace mockup */
+:root {
+  --cc-bg: #eef6ee;
+  --cc-sidebar: #1a3d24;
+  --cc-sidebar-hover: #254d30;
+  --cc-lime: #b8e986;
+  --cc-lime-dark: #8bc34a;
+  --cc-primary: #1e5b24;
+  --cc-primary-soft: #2d7a36;
+  --cc-gold: #c9a227;
+  --cc-panel: #ffffff;
+  --cc-text: #1a2420;
+  --cc-muted: #5f6f64;
+  --cc-border: #d4e5d6;
+  --bg: var(--cc-bg);
+  --panel: var(--cc-panel);
+  --primary: var(--cc-primary);
+  --primary-soft: var(--cc-primary-soft);
+  --text: var(--cc-text);
+  --muted: var(--cc-muted);
+  --border: var(--cc-border);
+}
+
+body { background: var(--cc-bg); }
+
+.cc-sidebar {
+  background: var(--cc-sidebar) !important;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 16px !important;
+}
+.cc-sidebar .brand-title { font-size: 26px; letter-spacing: -0.5px; }
+.cc-sidebar .brand-sub { color: var(--cc-lime); opacity: 1; font-weight: 600; }
+.cc-sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 999px;
+  color: #e8f5e9;
+  font-size: 14px;
+}
+.cc-sidebar .nav-link.active {
+  background: var(--cc-lime) !important;
+  color: var(--cc-sidebar) !important;
+  font-weight: 700;
+}
+.cc-sidebar .nav-link:hover:not(.active) { background: var(--cc-sidebar-hover) !important; }
+.cc-sidebar .nav-icon { width: 20px; text-align: center; }
+.cc-sidebar-bottom { margin-top: auto; padding-top: 20px; }
+.cc-claim-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: var(--cc-lime);
+  color: var(--cc-sidebar);
+  font-weight: 700;
+  padding: 12px;
+  border-radius: 999px;
+  text-decoration: none;
+  margin-bottom: 12px;
+  border: none;
+  cursor: pointer;
+}
+.cc-claim-btn:hover { filter: brightness(1.05); }
+
+.main { background: var(--cc-bg); }
+.topbar {
+  background: var(--cc-panel);
+  border: 1px solid var(--cc-border);
+  border-radius: 16px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+.points-pill {
+  background: #e8f5e9;
+  color: var(--cc-primary);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.notif-btn {
+  position: relative;
+  background: #f4faf4;
+  border: 1px solid var(--cc-border);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 18px;
+}
+.notif-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #e53935;
+  color: #fff;
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+}
+.notif-dropdown {
+  position: absolute;
+  right: 0;
+  top: 48px;
+  width: min(360px, 90vw);
+  background: #fff;
+  border: 1px solid var(--cc-border);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+  z-index: 1000;
+  max-height: 400px;
+  overflow-y: auto;
+  display: none;
+}
+.notif-dropdown.open { display: block; }
+.notif-item {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--cc-border);
+  font-size: 13px;
+  cursor: pointer;
+}
+.notif-item.unread { background: #f4faf4; }
+.notif-wrap { position: relative; }
+
+.impact-banner {
+  border-radius: 16px;
+  padding: 28px 32px;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(26, 61, 36, 0.92), rgba(30, 91, 36, 0.75)),
+    url("/assets/images/rit-campus.jpg") center / cover;
+  margin-bottom: 16px;
+}
+.impact-banner h2 { margin: 0 0 8px; font-size: 1.5rem; }
+.impact-banner p { margin: 0; opacity: 0.95; max-width: 520px; }
+
+.marketplace-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.filter-panel {
+  background: var(--cc-panel);
+  border: 1px solid var(--cc-border);
+  border-radius: 16px;
+  padding: 16px;
+}
+.filter-panel h4 { margin: 0 0 12px; font-size: 14px; }
+.filter-group { margin-bottom: 16px; }
+.filter-group label { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 8px; color: var(--cc-text); }
+
+.product-card {
+  border: 1px solid var(--cc-border);
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(30, 91, 36, 0.12);
+}
+.product-card .item-image { height: 140px; position: relative; }
+.product-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--cc-lime);
+  color: var(--cc-sidebar);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+.product-card .item-content { padding: 12px; }
+.product-cat { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--cc-muted); }
+.product-price { font-weight: 700; color: var(--cc-primary); }
+
+.fab-chat {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--cc-lime);
+  color: var(--cc-sidebar);
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  box-shadow: 0 8px 24px rgba(30, 91, 36, 0.35);
+  text-decoration: none;
+  z-index: 50;
+}
+
+.leaderboard-table { width: 100%; border-collapse: collapse; }
+.leaderboard-table th, .leaderboard-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--cc-border);
+}
+.leaderboard-table tr.highlight { background: #e8f5e9; font-weight: 600; }
+.rank-medal { font-size: 18px; }
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.topbar h1 { margin: 0; font-size: 1.35rem; }
+.topbar .search { flex: 1; min-width: 200px; max-width: 480px; margin: 0; }
+
+.page-content-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.panel-card {
+  background: var(--cc-panel);
+  border: 1px solid var(--cc-border);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.lf-entry-card {
+  border: 1px solid var(--cc-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.lf-entry-card:hover { border-color: #b8d2b9; background: #f9fcf9; }
+
+.resource-card .item-image { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); font-size: 48px; }
+
+.chat-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 16px;
+  min-height: 520px;
+}
+.chat-list-panel, .chat-thread-panel {
+  background: var(--cc-panel);
+  border: 1px solid var(--cc-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.chat-thread-panel { display: flex; flex-direction: column; min-height: 520px; }
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--cc-lime);
+  color: var(--cc-sidebar);
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+body.page-chat .fab-chat { display: none; }
+
+@media (max-width: 900px) {
+  .marketplace-layout,
+  .page-content-layout,
+  .chat-layout { grid-template-columns: 1fr; }
+}

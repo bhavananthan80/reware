@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -9,6 +10,9 @@ const usersRoutes = require("./routes/users.routes");
 const marketplaceRoutes = require("./routes/marketplace.routes");
 const lostFoundRoutes = require("./routes/lostfound.routes");
 const resourcesRoutes = require("./routes/resources.routes");
+const chatRoutes = require("./routes/chat.routes");
+const pointsRoutes = require("./routes/points.routes");
+const notificationsRoutes = require("./routes/notifications.routes");
 
 const app = express();
 const preferredPort = Number(process.env.PORT) || 4000;
@@ -26,6 +30,9 @@ app.use("/api/users", usersRoutes);
 app.use("/api/marketplace", marketplaceRoutes);
 app.use("/api/lostfound", lostFoundRoutes);
 app.use("/api/resources", resourcesRoutes);
+app.use("/api/chats", chatRoutes);
+app.use("/api/points", pointsRoutes);
+app.use("/api/notifications", notificationsRoutes);
 
 app.use(express.static(path.join(__dirname, "../frontend")));
 

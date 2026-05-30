@@ -4,6 +4,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { authMiddleware } = require("../middleware/auth.middleware");
 const { readDb, writeDb } = require("../utils/db");
+const { awardPoints } = require("../utils/points");
 
 const router = express.Router();
 
@@ -13,9 +14,20 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-router.get("/", authMiddleware, (_req, res) => {
+router.get("/", authMiddleware, (req, res) => {
   const db = readDb();
-  res.json(db.resources.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
+  const q = (req.query.q || "").trim().toLowerCase();
+  let list = db.resources.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  if (q) {
+    list = list.filter(
+      (r) =>
+        (r.title || "").toLowerCase().includes(q) ||
+        (r.type || "").toLowerCase().includes(q) ||
+        (r.department || "").toLowerCase().includes(q) ||
+        String(r.sem || "").toLowerCase().includes(q)
+    );
+  }
+  res.json(list);
 });
 
 router.post("/", authMiddleware, upload.single("file"), (req, res) => {
@@ -36,6 +48,7 @@ router.post("/", authMiddleware, upload.single("file"), (req, res) => {
     createdAt: new Date().toISOString()
   };
   db.resources.push(resource);
+  awardPoints(db, req.user.studentId, "RESOURCE_UPLOAD");
   writeDb(db);
   res.status(201).json(resource);
 });

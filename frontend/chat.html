@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CampusCycle | Chat</title>
+  <link rel="stylesheet" href="/assets/styles/global.css" />
+  <link rel="stylesheet" href="/assets/styles/theme.css" />
+  <link rel="stylesheet" href="/assets/styles/components.css" />
+  <link rel="stylesheet" href="/assets/styles/transitions.css" />
+</head>
+<body class="page-chat">
+  <div class="app-layout">
+    <aside class="sidebar"></aside>
+    <main class="main">
+      <div class="topbar">
+        <div><h1>Campus Chat</h1><p class="muted" style="margin:4px 0 0;font-size:13px;">Marketplace & Lost & Found conversations</p></div>
+      </div>
+      <div class="impact-banner">
+        <h2>CONNECT WITH BUYERS & SELLERS</h2>
+        <p>Chat opens automatically when a request is accepted. Phone numbers are shared so you can coordinate campus meetups safely.</p>
+      </div>
+      <div class="chips chat-module-tabs">
+        <button type="button" class="chip active" data-module="marketplace">REWARE Marketplace</button>
+        <button type="button" class="chip" data-module="lostfound">Lost & Found</button>
+      </div>
+      <section class="chat-layout">
+        <div class="chat-list-panel" style="padding:14px;">
+          <h3 style="margin-top:0;">Conversations</h3>
+          <div id="chat-list" class="chat-list"></div>
+        </div>
+        <div class="chat-thread-panel">
+          <div id="chat-empty" class="chat-empty muted">Select a conversation or accept a request to start chatting.</div>
+          <div id="chat-active" style="display:none;">
+            <div class="chat-header">
+              <div>
+                <strong id="chat-item-title"></strong>
+                <div class="muted" style="font-size:13px;" id="chat-peer-line"></div>
+              </div>
+            </div>
+            <div id="chat-messages" class="chat-messages"></div>
+            <form id="chat-form" class="chat-compose">
+              <input id="chat-input" type="text" placeholder="Type a message…" maxlength="2000" required />
+              <button class="btn" type="submit">Send</button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/layout.js"></script>
+  <script src="/assets/js/shell.js"></script>
+  <script src="/assets/js/notifications.js"></script>
+  <script src="/assets/js/transitions.js"></script>
+  <script src="/assets/js/pages/chat.js"></script>
+</body>
+</html>
+
+

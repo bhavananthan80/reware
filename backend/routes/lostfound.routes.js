@@ -5,6 +5,15 @@ const crypto = require("crypto");
 const { authMiddleware } = require("../middleware/auth.middleware");
 const { readDb, writeDb } = require("../utils/db");
 const { MEETING_PLACES, isValidMeetingPlace } = require("../utils/meetingPlaces");
+const { ensureChat, normalizeChatDb } = require("../utils/chat");
+const { awardPoints } = require("../utils/points");
+const { notify } = require("../utils/notifications");
+
+function chatIdForRequest(db, requestId) {
+  normalizeChatDb(db);
+  const chat = db.chats.find((c) => c.module === "lostfound" && c.requestId === requestId);
+  return chat ? chat.id : null;
+}
 
 const router = express.Router();
 
@@ -34,6 +43,7 @@ router.get("/", authMiddleware, (req, res) => {
   normalizeDb(db);
   const viewerId = req.user.studentId;
   const listings = db.lostFound
+    .filter((item) => (item.status || "OPEN") === "OPEN")
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .map((item) => {
       const requests = db.lostFoundRequests;
@@ -77,6 +87,7 @@ function createEntry(req, res, type) {
     createdAt: new Date().toISOString()
   };
   db.lostFound.push(entry);
+  awardPoints(db, req.user.studentId, type === "lost" ? "LOST_REPORT" : "FOUND_REPORT");
   writeDb(db);
   return res.status(201).json(entry);
 }
@@ -133,6 +144,16 @@ router.post("/:itemId/requests", authMiddleware, (req, res) => {
     updatedAt: now
   };
   db.lostFoundRequests.push(request);
+  const requester = studentById(db, requesterId);
+  const loc = item.location || "campus";
+  notify(db, {
+    userId: targetId,
+    type: "lostfound_request",
+    title: "New Lost & Found request",
+    message: `${requester ? requester.name : "Someone"} wants to connect about "${item.itemName}" (${loc}).`,
+    link: "/lost-found.html",
+    smsBody: `REWARE: ${requester ? requester.name : "Someone"} requested your ${item.type} item "${item.itemName}" near ${loc}. Open the app to respond.`
+  });
   writeDb(db);
   res.status(201).json(request);
 });
@@ -150,6 +171,8 @@ router.get("/requests/incoming", authMiddleware, (req, res) => {
       return {
         ...r,
         requesterName: requester ? requester.name : "Unknown",
+        requesterPhone: requester ? requester.phone || "" : "",
+        chatId: chatIdForRequest(db, r.id),
         itemTitle: item ? item.itemName : "(removed)"
       };
     });
@@ -169,6 +192,8 @@ router.get("/requests/outgoing", authMiddleware, (req, res) => {
       return {
         ...r,
         targetName: targetUser ? targetUser.name : "Unknown",
+        targetPhone: targetUser ? targetUser.phone || "" : "",
+        chatId: chatIdForRequest(db, r.id),
         itemTitle: item ? item.itemName : "(removed)"
       };
     });
@@ -222,8 +247,29 @@ router.patch("/requests/:requestId/accept", authMiddleware, (req, res) => {
     db.lostFound[itemIndex].acceptedRequestId = request.id;
   }
 
+  const chat = ensureChat(db, {
+    module: "lostfound",
+    requestId: request.id,
+    participantIds: [request.targetId, request.requesterId],
+    itemTitle: item ? item.itemName : "Lost & Found item"
+  });
+  request.chatId = chat.id;
+
+  awardPoints(db, request.targetId, "LOSTFOUND_RESOLVED");
+  awardPoints(db, request.requesterId, "LOSTFOUND_RESOLVED");
+  const owner = studentById(db, request.targetId);
+  const itemName = item ? item.itemName : "item";
+  notify(db, {
+    userId: request.requesterId,
+    type: "lostfound_accepted",
+    title: "Lost & Found request accepted",
+    message: `${owner ? owner.name : "Owner"} accepted your request for "${itemName}".`,
+    link: `/chat.html?module=lostfound&chat=${chat.id}`,
+    smsBody: `REWARE: Your Lost & Found request for "${itemName}" was accepted! Meet details are in the app.`
+  });
+
   writeDb(db);
-  res.json(request);
+  res.json({ ...request, chatId: chat.id });
 });
 
 router.patch("/requests/:requestId/reject", authMiddleware, (req, res) => {

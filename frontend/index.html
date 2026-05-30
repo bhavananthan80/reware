@@ -3,28 +3,114 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CampusCycle | Student Login</title>
+  <title>REWARE | Welcome</title>
   <link rel="stylesheet" href="/assets/styles/global.css" />
+  <link rel="stylesheet" href="/assets/styles/auth.css" />
 </head>
-<body class="auth-page">
-  <section class="auth-card" style="width:min(900px,92vw);padding:24px;">
-    <h2>Rajalakshmi Institute of Technogy</h2>
-    <h1 style="margin-top:4px;">REWARE Campus Cycle</h1>
-    <p class="muted">Student Login and Profile Onboarding</p>
-    <p class="muted" style="font-size:13px;margin-top:8px;">Only verified Rajalakshmi addresses are allowed, e.g. <strong>bhavananthan.250013@csbs.ritchennai.edu.in</strong> (your <code>dept.ritchennai.edu.in</code> email).</p>
-    <form id="login-form" class="form-grid" style="margin-top:14px;">
-      <div style="grid-column:1/-1;"><label>Student Email ID (college only)</label><input required name="email" type="email" autocomplete="email" placeholder="name.regno@csbs.ritchennai.edu.in" pattern=".+@.+\.ritchennai\.edu\.in" title="Must be your @*.ritchennai.edu.in college email" /></div>
-      <div><label>Student Name</label><input required name="name" /></div>
-      <div><label>Reg No</label><input required name="regNo" /></div>
-      <div><label>Department</label><input required name="department" /></div>
-      <div><label>Year</label><input required name="year" /></div>
-      <div><label>Semester</label><input required name="sem" /></div>
-      <div style="grid-column:1/-1;display:flex;justify-content:flex-end;">
-        <button class="btn" type="submit">Enter CampusCycle</button>
+<body>
+  <div class="auth-split">
+    <section class="auth-hero" aria-hidden="true">
+      <div class="auth-hero-content">
+        <h2>Sustainable Living.</h2>
+        <p>Join your campus community in building a more circular future through shared resources.</p>
       </div>
-    </form>
-    <p id="error-msg" style="color:#b73030;"></p>
-  </section>
+    </section>
+
+    <section class="auth-panel">
+      <div class="auth-form-wrap">
+        <img class="auth-logo" src="/assets/images/rit-logo.png" alt="Rajalakshmi Institute of Technology" />
+        <h1>Welcome to REWARE</h1>
+        <p class="auth-tagline">Promoting collegiate sustainability through circular exchange.</p>
+        <div class="auth-milestone">♻ MILESTONE: 14,200+ Items Reused this Semester</div>
+
+        <form id="login-form" class="auth-form">
+          <div class="field">
+            <label for="name">Student Name</label>
+            <div class="auth-input-wrap">
+              <span class="icon">👤</span>
+              <input id="name" name="name" required placeholder="Enter your full name" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="email">College Email ID</label>
+            <div class="auth-input-wrap">
+              <span class="icon">✉</span>
+              <input id="email" name="email" type="email" required autocomplete="email"
+                placeholder="student@dept.ritchennai.edu.in"
+                pattern=".+@.+\.ritchennai\.edu\.in"
+                title="Must be your @*.ritchennai.edu.in college email" />
+            </div>
+            <p class="auth-hint">ⓘ College Email Only</p>
+          </div>
+          <div class="field">
+            <label for="phone">Phone Number</label>
+            <div class="auth-input-wrap">
+              <span class="icon">📞</span>
+              <input id="phone" name="phone" type="tel" required placeholder="+91 98765 43210" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="regNo">Registration No</label>
+            <div class="auth-input-wrap">
+              <span class="icon">#</span>
+              <input id="regNo" name="regNo" required placeholder="e.g. 250013" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="department">Department</label>
+            <div class="auth-input-wrap">
+              <span class="icon">🏛</span>
+              <select id="department" name="department" required>
+                <option value="">Select your department</option>
+                <option>Computer Science and Business Systems</option>
+                <option>Computer Science and Engineering</option>
+                <option>Information Technology</option>
+                <option>Electronics and Communication Engineering</option>
+                <option>Electrical and Electronics Engineering</option>
+                <option>Mechanical Engineering</option>
+                <option>Civil Engineering</option>
+                <option>Biotechnology</option>
+                <option>Artificial Intelligence and Data Science</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="year">Academic Year</label>
+              <div class="auth-input-wrap">
+                <span class="icon">📅</span>
+                <select id="year" name="year" required>
+                  <option value="2024-25">2024-25</option>
+                  <option value="2025-26">2025-26</option>
+                  <option value="2026-27">2026-27</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="sem">Semester</label>
+              <div class="auth-input-wrap">
+                <span class="icon">📖</span>
+                <select id="sem" name="sem" required>
+                  <option value="1">1st</option>
+                  <option value="2">2nd</option>
+                  <option value="3">3rd</option>
+                  <option value="4">4th</option>
+                  <option value="5">5th</option>
+                  <option value="6">6th</option>
+                  <option value="7">7th</option>
+                  <option value="8">8th</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <button class="btn auth-submit" type="submit">Sign In / Join System</button>
+          <p id="error-msg" class="auth-error"></p>
+        </form>
+        <p class="auth-footer">By signing in, you agree to our Campus Map and Safety Guidelines. Promoting a circular economy together.</p>
+      </div>
+    </section>
+  </div>
 
   <script src="/assets/js/api.js"></script>
   <script src="/assets/js/auth.js"></script>
@@ -33,6 +119,8 @@
       e.preventDefault();
       const formData = new FormData(e.target);
       const payload = Object.fromEntries(formData.entries());
+      const errEl = document.getElementById("error-msg");
+      errEl.textContent = "";
       try {
         const result = await api("/api/auth/login", {
           method: "POST",
@@ -43,7 +131,7 @@
         setStudent(result.student);
         window.location.href = "/dashboard.html";
       } catch (error) {
-        document.getElementById("error-msg").textContent = error.message;
+        errEl.textContent = error.message;
       }
     });
   </script>

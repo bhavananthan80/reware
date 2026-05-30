@@ -5,6 +5,8 @@ let currentUser = null;
 let meetingPlaces = [];
 let requestItemId = null;
 let acceptLfRequestId = null;
+let lfFilter = "all";
+let lfSearch = "";
 
 function escapeHtml(s) {
   const div = document.createElement("div");
@@ -32,10 +34,12 @@ function listTemplate(items) {
       actionBtn = `<button class='btn small request-btn' data-id='${entry.id}'>Request / Claim</button>`;
     }
 
-    return `<div class="list-item" style="display:flex; justify-content:space-between; align-items:center;">
+    const typeBadge = entry.type === "lost" ? "🔴 Lost" : "🟢 Found";
+    return `<div class="lf-entry-card">
       <div>
+        <span class="product-badge" style="position:static;display:inline-block;margin-bottom:6px;">${typeBadge}</span>
         <strong>${escapeHtml(entry.itemName)}</strong>
-        <div class="muted" style="font-size:13px;">${escapeHtml(entry.location)} • ${escapeHtml(entry.time || "No time specified")}</div>
+        <div class="muted" style="font-size:13px;">📍 ${escapeHtml(entry.location)} · ${escapeHtml(entry.time || "No time")}</div>
       </div>
       <div>${actionBtn}</div>
     </div>`;
@@ -83,7 +87,7 @@ function renderIncoming(list) {
     <div class="list-item request-row">
       <div>
         <strong>${escapeHtml(r.itemTitle)}</strong>
-        <div class="muted" style="font-size:13px;">From ${escapeHtml(r.requesterName)}</div>
+        <div class="muted" style="font-size:13px;">From ${escapeHtml(r.requesterName)} · ${escapeHtml(r.requesterPhone || "No phone")}</div>
         <div class="meet-highlight" style="margin-top:4px;">They proposed: ${escapeHtml(r.meetingPlace)} at ${escapeHtml(r.meetingTime)}</div>
         ${r.message ? `<div style="margin-top:6px;font-size:13px;">"${escapeHtml(r.message)}"</div>` : ""}
       </div>
@@ -125,10 +129,11 @@ function renderOutgoing(list) {
       <div>
         <span class="status-pill ${statusClass(r.status)}">${escapeHtml(r.status)}</span>
         <strong style="margin-left:8px;">${escapeHtml(r.itemTitle)}</strong>
-        <div class="muted" style="font-size:13px;">To: ${escapeHtml(r.targetName)}</div>
+        <div class="muted" style="font-size:13px;">To: ${escapeHtml(r.targetName)} · ${escapeHtml(r.targetPhone || "No phone")}</div>
         ${meetLine}
       </div>
       <div class="request-actions">
+        ${r.status === "ACCEPTED" ? `<a class="btn small" href="/chat.html?module=lostfound&chat=${r.chatId || ""}" data-nav>Open Chat</a>` : ""}
         ${r.status === "PENDING" ? `<button type="button" class="btn secondary small" data-action="cancel" data-id="${r.id}">Cancel</button>` : ""}
       </div>
     </div>
@@ -165,6 +170,21 @@ function closeRequestModal() {
   document.getElementById("request-modal").style.display = "none";
 }
 
+function applyLfFilters(data) {
+  let list = data;
+  if (lfFilter === "lost") list = list.filter((i) => i.type === "lost");
+  if (lfFilter === "found") list = list.filter((i) => i.type === "found");
+  if (lfSearch) {
+    const q = lfSearch.toLowerCase();
+    list = list.filter(
+      (i) =>
+        (i.itemName || "").toLowerCase().includes(q) ||
+        (i.location || "").toLowerCase().includes(q)
+    );
+  }
+  return list;
+}
+
 async function refresh() {
   const [data, incoming, outgoing] = await Promise.all([
     api("/api/lostfound"),
@@ -173,9 +193,12 @@ async function refresh() {
   ]);
 
   allItems = data;
+  const filtered = applyLfFilters(data);
+  const countEl = document.getElementById("lf-count");
+  if (countEl) countEl.textContent = `Showing ${filtered.length} open reports on campus`;
 
-  document.getElementById("lost-list").innerHTML = listTemplate(data.filter((i) => i.type === "lost"));
-  document.getElementById("found-list").innerHTML = listTemplate(data.filter((i) => i.type === "found"));
+  document.getElementById("lost-list").innerHTML = listTemplate(filtered.filter((i) => i.type === "lost"));
+  document.getElementById("found-list").innerHTML = listTemplate(filtered.filter((i) => i.type === "found"));
 
   document.querySelectorAll(".request-btn").forEach((btn) => {
     btn.addEventListener("click", () => openRequestModal(btn.dataset.id));
@@ -186,12 +209,31 @@ async function refresh() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  document.getElementById("logout-link").addEventListener("click", logout);
-
   currentUser = await api("/api/users/me");
   meetingPlaces = await api("/api/marketplace/meeting-places");
 
   await refresh();
+
+  const lfSearchInput = document.getElementById("lf-search");
+  if (lfSearchInput) {
+    lfSearchInput.addEventListener("input", () => {
+      lfSearch = lfSearchInput.value;
+      const filtered = applyLfFilters(allItems);
+      document.getElementById("lost-list").innerHTML = listTemplate(filtered.filter((i) => i.type === "lost"));
+      document.getElementById("found-list").innerHTML = listTemplate(filtered.filter((i) => i.type === "found"));
+      const countEl = document.getElementById("lf-count");
+      if (countEl) countEl.textContent = `Showing ${filtered.length} open reports on campus`;
+    });
+  }
+
+  document.querySelectorAll("[data-lf-filter]").forEach((chip) => {
+    chip.addEventListener("click", async () => {
+      document.querySelectorAll("[data-lf-filter]").forEach((c) => c.classList.remove("active"));
+      chip.classList.add("active");
+      lfFilter = chip.dataset.lfFilter;
+      await refresh();
+    });
+  });
 
   async function bindForm(formId, endpoint) {
     document.getElementById(formId).addEventListener("submit", async (event) => {
@@ -254,12 +296,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
     try {
-      await api(`/api/lostfound/requests/${acceptLfRequestId}/accept`, {
+      const accepted = await api(`/api/lostfound/requests/${acceptLfRequestId}/accept`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ meetingPlace, meetingTime })
       });
       closeAcceptLfModal();
+      if (accepted.chatId) {
+        window.location.href = `/chat.html?module=lostfound&chat=${accepted.chatId}`;
+        return;
+      }
       await refresh();
     } catch (e) {
       errEl.textContent = e.message || "Failed";

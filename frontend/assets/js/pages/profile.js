@@ -1,11 +1,29 @@
 requireAuth();
 
 document.addEventListener("DOMContentLoaded", async () => {
-  document.getElementById("logout-link").addEventListener("click", logout);
   const me = await api("/api/users/me");
   setStudent(me);
 
-  ["email", "regNo", "name", "department", "year", "sem"].forEach((field) => {
+  const initials = (me.name || "S")
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const hero = document.getElementById("profile-hero");
+  if (hero) {
+    hero.innerHTML = `
+      <div class="profile-avatar">${initials}</div>
+      <div>
+        <h2 style="margin:0;">${me.name || "Student"}</h2>
+        <p class="muted" style="margin:4px 0 0;">${me.department || ""} · Year ${me.year || ""} · Sem ${me.sem || ""}</p>
+        <p class="muted" style="margin:4px 0 0;font-size:13px;">${me.email || ""}</p>
+      </div>
+    `;
+  }
+
+  ["email", "regNo", "phone", "name", "department", "year", "sem"].forEach((field) => {
     const input = document.getElementById(field);
     if (input) input.value = me[field] || "";
   });
@@ -14,6 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     event.preventDefault();
     const payload = {
       name: document.getElementById("name").value,
+      phone: document.getElementById("phone").value,
       department: document.getElementById("department").value,
       year: document.getElementById("year").value,
       sem: document.getElementById("sem").value

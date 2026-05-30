@@ -5,58 +5,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CampusCycle | Lost & Found</title>
   <link rel="stylesheet" href="/assets/styles/global.css" />
+  <link rel="stylesheet" href="/assets/styles/theme.css" />
   <link rel="stylesheet" href="/assets/styles/components.css" />
   <link rel="stylesheet" href="/assets/styles/transitions.css" />
 </head>
 <body>
   <div class="app-layout">
-    <aside class="sidebar">
-      <div class="brand-title">CampusCycle</div><div class="brand-sub">REWARE | SDG12</div>
-      <div class="nav-group"><div class="nav-label">Overview</div><a class="nav-link" data-page="dashboard.html" data-nav href="/dashboard.html">Dashboard</a></div>
-      <div class="nav-group"><div class="nav-label">Modules</div><a class="nav-link" data-page="reware.html" data-nav href="/reware.html">ReUse Marketplace</a><a class="nav-link" data-page="academic-hub.html" data-nav href="/academic-hub.html">Academic Hub</a><a class="nav-link" data-page="lost-found.html" data-nav href="/lost-found.html">Lost & Found</a></div>
-      <div class="nav-group"><div class="nav-label">Account</div><a class="nav-link" data-page="profile.html" data-nav href="/profile.html">My Profile</a><a class="nav-link" href="#" id="logout-link">Logout</a></div>
-    </aside>
+    <aside class="sidebar"></aside>
     <main class="main">
-      <div class="topbar"><div><h1>Smart Lost & Found</h1><div class="muted" id="institution-header"></div></div></div>
-      <div class="split-2">
+      <div class="topbar">
+        <input id="lf-search" class="search" type="search" placeholder="Search lost or found items, locations…" />
+      </div>
+      <div class="impact-banner">
+        <h2>SMART LOST & FOUND</h2>
+        <p>Report lost or found items across campus — canteen, library, hostel, and more. Recover items and earn sustainability points when matched.</p>
+      </div>
+      <div class="split-2" style="margin-bottom:14px;">
         <div class="card panel">
           <h3>Report Something Lost</h3>
-          <form id="lost-form"><label>Item Name</label><input name="itemName" required /><label>Location where it was lost</label><input name="location" required /><label>Date/Time Lost</label><input type="datetime-local" name="time" required /><label>Image (optional)</label><input type="file" name="image" accept="image/*" /><div style="margin-top:10px;"><button class="btn" type="submit">Report Lost</button></div></form>
+          <form id="lost-form">
+            <label>Item Name</label><input name="itemName" required />
+            <label>Location where it was lost</label><input name="location" required placeholder="e.g. Canteen, Block A" />
+            <label>Date/Time Lost</label><input type="datetime-local" name="time" required />
+            <label>Image (optional)</label><input type="file" name="image" accept="image/*" />
+            <div style="margin-top:10px;"><button class="btn" type="submit">Report Lost</button></div>
+          </form>
         </div>
         <div class="card panel">
           <h3>Report Something Found</h3>
-          <form id="found-form"><label>Item Name</label><input name="itemName" required /><label>Location where it was found</label><input name="location" required /><label>Date/Time Found</label><input type="datetime-local" name="time" required /><label>Image (optional)</label><input type="file" name="image" accept="image/*" /><div style="margin-top:10px;"><button class="btn" type="submit">Report Found</button></div></form>
+          <form id="found-form">
+            <label>Item Name</label><input name="itemName" required />
+            <label>Location where it was found</label><input name="location" required placeholder="e.g. Canteen, Block A" />
+            <label>Date/Time Found</label><input type="datetime-local" name="time" required />
+            <label>Image (optional)</label><input type="file" name="image" accept="image/*" />
+            <div style="margin-top:10px;"><button class="btn" type="submit">Report Found</button></div>
+          </form>
         </div>
       </div>
-      <section class="split-2" style="margin-bottom:14px; margin-top:20px;">
+      <section class="split-2" style="margin-bottom:14px;">
         <div class="card panel">
           <h3>Incoming requests</h3>
-          <p class="muted" style="margin-top:0;font-size:13px;">Review proposals below. When you accept, you set the final campus meeting place and time.</p>
+          <p class="muted" style="margin-top:0;font-size:13px;">Review proposals. When you accept, set the final campus meeting place and time.</p>
           <div id="incoming-requests"></div>
         </div>
         <div class="card panel">
           <h3>My requests</h3>
-          <p class="muted" style="margin-top:0;font-size:13px;">Requests you sent to others for lost/found items.</p>
+          <p class="muted" style="margin-top:0;font-size:13px;">Requests you sent for lost/found items.</p>
           <div id="outgoing-requests"></div>
         </div>
       </section>
-
-      <div class="split-2" style="margin-top:12px;">
-        <div class="card panel"><h3>Lost Items</h3><div id="lost-list"></div></div>
-        <div class="card panel"><h3>Found Items</h3><div id="found-list"></div></div>
+      <div class="page-content-layout">
+        <aside class="filter-panel">
+          <h4>Categories</h4>
+          <div class="filter-group chips" style="flex-direction:column;align-items:stretch;">
+            <button type="button" class="chip active" data-lf-filter="all">All</button>
+            <button type="button" class="chip" data-lf-filter="lost">Lost</button>
+            <button type="button" class="chip" data-lf-filter="found">Found</button>
+          </div>
+          <h4 style="margin-top:16px;">Tips</h4>
+          <p class="muted" style="font-size:12px;">Include exact location (e.g. canteen counter) for faster matches.</p>
+        </aside>
+        <div>
+          <div class="row" style="margin-bottom:10px;">
+            <div><h2 style="margin:0;">Campus Listings</h2><p class="muted" id="lf-count" style="margin:4px 0 0;font-size:13px;"></p></div>
+          </div>
+          <div class="split-2">
+            <div class="panel-card"><h3>Lost Items</h3><div id="lost-list"></div></div>
+            <div class="panel-card"><h3>Found Items</h3><div id="found-list"></div></div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
 
   <div id="request-modal" class="modal-backdrop" role="dialog" aria-modal="true" style="display:none;">
     <div class="modal card">
-      <h3 style="margin-top:0;">Request/Claim Item</h3>
+      <h3 style="margin-top:0;">Request / Claim Item</h3>
       <p id="request-item-title" class="muted"></p>
       <label>Proposed Meeting Place</label>
       <select id="request-meeting-place"></select>
-      <label style="margin-top:8px; display:block;">Proposed Meeting Time</label>
-      <input type="time" id="request-meeting-time" required style="width:100%; border-radius:4px; border:1px solid #ddd; padding:8px;" />
-      <label style="margin-top:8px; display:block;">Message</label>
+      <label style="margin-top:8px;display:block;">Proposed Meeting Time</label>
+      <input type="time" id="request-meeting-time" required />
+      <label style="margin-top:8px;display:block;">Message</label>
       <textarea id="request-message" rows="3" placeholder="Hi, I believe this is mine. Let's meet up!"></textarea>
       <p id="request-modal-error" class="form-error"></p>
       <div class="row" style="margin-top:12px;">
@@ -70,11 +100,11 @@
     <div class="modal card">
       <h3 style="margin-top:0;">Confirm handover</h3>
       <p id="accept-lf-summary" class="muted"></p>
-      <p class="muted" style="font-size:13px;">Set the final meeting point and time (buyer sees these after you confirm).</p>
+      <p class="muted" style="font-size:13px;">Set the final meeting point and time.</p>
       <label>Final meeting place</label>
       <select id="accept-lf-meeting-place"></select>
-      <label style="margin-top:8px; display:block;">Final meeting time</label>
-      <input type="time" id="accept-lf-meeting-time" required style="width:100%; border-radius:10px; border:1px solid var(--border); padding:10px;" />
+      <label style="margin-top:8px;display:block;">Final meeting time</label>
+      <input type="time" id="accept-lf-meeting-time" required />
       <p id="accept-lf-modal-error" class="form-error"></p>
       <div class="row" style="margin-top:12px;">
         <button type="button" id="accept-lf-cancel" class="btn secondary">Cancel</button>
@@ -83,6 +113,14 @@
     </div>
   </div>
 
-  <script src="/assets/js/api.js"></script><script src="/assets/js/auth.js"></script><script src="/assets/js/layout.js"></script><script src="/assets/js/transitions.js"></script><script src="/assets/js/pages/lost-found.js"></script>
+  <a href="/chat.html" class="fab-chat" data-nav title="Chat">💬</a>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/layout.js"></script>
+  <script src="/assets/js/shell.js"></script>
+  <script src="/assets/js/notifications.js"></script>
+  <script src="/assets/js/transitions.js"></script>
+  <script src="/assets/js/pages/lost-found.js"></script>
 </body>
 </html>
+

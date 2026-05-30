@@ -5,33 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CampusCycle | Academic Hub</title>
   <link rel="stylesheet" href="/assets/styles/global.css" />
+  <link rel="stylesheet" href="/assets/styles/theme.css" />
   <link rel="stylesheet" href="/assets/styles/components.css" />
   <link rel="stylesheet" href="/assets/styles/transitions.css" />
 </head>
 <body>
   <div class="app-layout">
-    <aside class="sidebar">
-      <div class="brand-title">CampusCycle</div><div class="brand-sub">REWARE | SDG12</div>
-      <div class="nav-group"><div class="nav-label">Overview</div><a class="nav-link" data-page="dashboard.html" data-nav href="/dashboard.html">Dashboard</a></div>
-      <div class="nav-group"><div class="nav-label">Modules</div><a class="nav-link" data-page="reware.html" data-nav href="/reware.html">ReUse Marketplace</a><a class="nav-link" data-page="academic-hub.html" data-nav href="/academic-hub.html">Academic Hub</a><a class="nav-link" data-page="lost-found.html" data-nav href="/lost-found.html">Lost & Found</a></div>
-      <div class="nav-group"><div class="nav-label">Account</div><a class="nav-link" data-page="profile.html" data-nav href="/profile.html">My Profile</a><a class="nav-link" href="#" id="logout-link">Logout</a></div>
-    </aside>
+    <aside class="sidebar"></aside>
     <main class="main">
-      <div class="topbar"><div><h1>Academic Resource Hub</h1><div class="muted" id="institution-header"></div></div></div>
-      <div class="card panel">
+      <div class="topbar">
+        <input id="resource-search" class="search" type="search" placeholder="Search notes, question papers, guides…" />
+        <button type="button" id="toggle-upload" class="btn">+ Upload Resource</button>
+      </div>
+      <div class="impact-banner">
+        <h2>ACADEMIC RESOURCE SHARING</h2>
+        <p>Share notes, question papers, and study guides with your campus. Every upload earns sustainability points for you and your department.</p>
+      </div>
+      <div class="card panel" id="upload-panel" style="display:none;margin-bottom:14px;">
         <h3>Upload Resource</h3>
         <form id="resource-form" class="form-grid">
           <div><label>Title</label><input name="title" required /></div>
-          <div><label>Type</label><select name="type"><option>Notes</option><option>Question Bank</option><option>Study Guide</option></select></div>
+          <div><label>Type</label><select name="type"><option>Notes</option><option>Question Paper</option><option>Question Bank</option><option>Study Guide</option><option>Other</option></select></div>
           <div><label>Department</label><input name="department" required /></div>
           <div><label>Semester</label><input name="sem" required /></div>
           <div style="grid-column:1/-1;"><label>File</label><input type="file" name="file" /></div>
           <div style="grid-column:1/-1;display:flex;justify-content:flex-end;"><button class="btn" type="submit">Upload Resource</button></div>
         </form>
       </div>
-      <div class="cards-grid" id="resource-grid" style="margin-top:12px;"></div>
+      <div class="page-content-layout">
+        <aside class="filter-panel">
+          <h4>Resource types</h4>
+          <div class="filter-group chips" style="flex-direction:column;align-items:stretch;">
+            <button type="button" class="chip active" data-type-filter="all">All</button>
+            <button type="button" class="chip" data-type-filter="notes">Notes</button>
+            <button type="button" class="chip" data-type-filter="question">Question Papers</button>
+            <button type="button" class="chip" data-type-filter="guide">Study Guides</button>
+          </div>
+          <h4 style="margin-top:16px;">Impact</h4>
+          <p class="muted" style="font-size:12px;">📚 Sharing resources reduces paper waste and helps peers succeed.</p>
+        </aside>
+        <div>
+          <div class="row" style="margin-bottom:10px;">
+            <div><h2 style="margin:0;">Discover Resources</h2><p class="muted" id="resource-count" style="margin:4px 0 0;font-size:13px;"></p></div>
+          </div>
+          <div class="cards-grid" id="resource-grid"></div>
+        </div>
+      </div>
     </main>
   </div>
-  <script src="/assets/js/api.js"></script><script src="/assets/js/auth.js"></script><script src="/assets/js/layout.js"></script><script src="/assets/js/transitions.js"></script><script src="/assets/js/pages/academic-hub.js"></script>
+  <a href="/chat.html" class="fab-chat" data-nav title="Chat">💬</a>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/layout.js"></script>
+  <script src="/assets/js/shell.js"></script>
+  <script src="/assets/js/notifications.js"></script>
+  <script src="/assets/js/transitions.js"></script>
+  <script src="/assets/js/pages/academic-hub.js"></script>
 </body>
 </html>

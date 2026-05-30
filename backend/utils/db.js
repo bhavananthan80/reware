@@ -10,7 +10,12 @@ function defaultDb() {
     marketplaceRequests: [],
     lostFound: [],
     lostFoundRequests: [],
-    resources: []
+    resources: [],
+    chats: [],
+    chatMessages: [],
+    notifications: [],
+    pointEvents: [],
+    certificates: []
   };
 }
 

@@ -3,48 +3,71 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CampusCycle | ReUse Marketplace</title>
+  <title>CampusCycle | Marketplace</title>
   <link rel="stylesheet" href="/assets/styles/global.css" />
+  <link rel="stylesheet" href="/assets/styles/theme.css" />
   <link rel="stylesheet" href="/assets/styles/components.css" />
   <link rel="stylesheet" href="/assets/styles/transitions.css" />
 </head>
 <body>
   <div class="app-layout">
-    <aside class="sidebar">
-      <div class="brand-title">CampusCycle</div><div class="brand-sub">REWARE | SDG12</div>
-      <div class="nav-group"><div class="nav-label">Overview</div><a class="nav-link" data-page="dashboard.html" data-nav href="/dashboard.html">Dashboard</a></div>
-      <div class="nav-group"><div class="nav-label">Modules</div><a class="nav-link" data-page="reware.html" data-nav href="/reware.html">ReUse Marketplace</a><a class="nav-link" data-page="academic-hub.html" data-nav href="/academic-hub.html">Academic Hub</a><a class="nav-link" data-page="lost-found.html" data-nav href="/lost-found.html">Lost & Found</a></div>
-      <div class="nav-group"><div class="nav-label">Account</div><a class="nav-link" data-page="profile.html" data-nav href="/profile.html">My Profile</a><a class="nav-link" href="#" id="logout-link">Logout</a></div>
-    </aside>
+    <aside class="sidebar"></aside>
     <main class="main">
-      <div class="topbar"><div><h1>ReUse Marketplace</h1><div class="muted" id="institution-header"></div></div><button id="toggle-upload" class="btn">+ List an Item</button></div>
+      <div class="topbar">
+        <input class="search" id="market-search" type="search" placeholder="Search marketplace (textbooks, electronics…)" style="flex:1;max-width:480px;" />
+        <button id="toggle-upload" class="btn">+ List an Item</button>
+      </div>
+      <div class="impact-banner">
+        <h2>IMPACT DASHBOARD · Cycle More, Save More</h2>
+        <p>Items you reuse on campus earn sustainability points and reduce carbon. High-impact listings help you climb the leaderboard!</p>
+      </div>
       <div class="card panel" id="upload-panel" style="display:none;margin-bottom:12px;">
         <h3>Upload Used Item</h3>
         <form id="market-form" class="form-grid">
-          <div><label>Title</label><input name="title" required /></div><div><label>Category</label><input name="category" placeholder="Calculator / Notes / Stationery" required /></div>
-          <div><label>Condition</label><select name="condition"><option>GOOD</option><option>LIKE NEW</option><option>FAIR</option></select></div><div><label>Price</label><input name="price" type="number" required /></div>
+          <div><label>Title</label><input name="title" required /></div>
+          <div><label>Category</label><input name="category" placeholder="Textbooks / Electronics / Stationery" required /></div>
+          <div><label>Condition</label><select name="condition"><option>GOOD</option><option>LIKE NEW</option><option>FAIR</option></select></div>
+          <div><label>Price (₹)</label><input name="price" type="number" required /></div>
           <div style="grid-column:1/-1;"><label>Description</label><textarea name="description"></textarea></div>
           <div style="grid-column:1/-1;"><label>Image</label><input type="file" name="image" accept="image/*" /></div>
           <div style="grid-column:1/-1;display:flex;justify-content:flex-end;"><button class="btn" type="submit">Upload Item</button></div>
         </form>
       </div>
-      <div class="chips"><button class="chip active" data-filter="all">All</button><button class="chip" data-filter="Textbooks">Textbooks</button><button class="chip" data-filter="Lab">Lab Equipment</button><button class="chip" data-filter="Calculator">Calculators</button><button class="chip" data-filter="Stationery">Stationery</button></div>
       <section class="split-2" style="margin-bottom:14px;">
         <div class="card panel">
           <h3>Incoming requests</h3>
-          <p class="muted" style="margin-top:0;font-size:13px;">Buyers who want your listings. Accept and pick a campus meet point.</p>
+          <p class="muted" style="margin-top:0;font-size:13px;">Buyers who want your listings.</p>
           <div id="incoming-requests"></div>
         </div>
         <div class="card panel">
           <h3>My requests</h3>
-          <p class="muted" style="margin-top:0;font-size:13px;">Requests you sent. If accepted, your meet point appears here.</p>
+          <p class="muted" style="margin-top:0;font-size:13px;">Your buy requests and meet details.</p>
           <div id="outgoing-requests"></div>
         </div>
       </section>
-      <div class="cards-grid" id="market-grid"></div>
+      <div class="marketplace-layout">
+        <aside class="filter-panel">
+          <h4>Categories</h4>
+          <div class="filter-group chips" style="flex-direction:column;align-items:stretch;">
+            <button class="chip active" data-filter="all">All</button>
+            <button class="chip" data-filter="Textbooks">Textbooks</button>
+            <button class="chip" data-filter="Lab">Lab Equipment</button>
+            <button class="chip" data-filter="Calculator">Calculators</button>
+            <button class="chip" data-filter="Stationery">Stationery</button>
+          </div>
+          <h4>Sustainability</h4>
+          <p class="muted" style="font-size:12px;">🍃 Reuse saves ~2.4 kg CO₂ per item (estimate).</p>
+        </aside>
+        <div>
+          <div class="row" style="margin-bottom:10px;">
+            <div><h2 style="margin:0;">Discover Items</h2><p class="muted" id="item-count" style="margin:4px 0 0;font-size:13px;"></p></div>
+          </div>
+          <div class="cards-grid" id="market-grid"></div>
+        </div>
+      </div>
     </main>
   </div>
-
+  <a href="/chat.html" class="fab-chat" data-nav title="Chat">💬</a>
   <div id="request-modal" class="modal-backdrop" role="dialog" aria-modal="true" style="display:none;">
     <div class="modal card">
       <h3 style="margin-top:0;">Request to buy</h3>
@@ -58,15 +81,14 @@
       </div>
     </div>
   </div>
-
   <div id="accept-modal" class="modal-backdrop" role="dialog" aria-modal="true" style="display:none;">
     <div class="modal card">
       <h3 style="margin-top:0;">Accept request</h3>
       <p id="accept-buyer-line" class="muted"></p>
       <label>Meeting place on campus</label>
       <select id="accept-meeting-place"></select>
-      <label style="margin-top:8px; display:block;">Meeting Time</label>
-      <input type="time" id="accept-meeting-time" required style="width:100%; border-radius:4px; border:1px solid #ddd; padding:8px;" />
+      <label style="margin-top:8px;display:block;">Meeting Time</label>
+      <input type="time" id="accept-meeting-time" required />
       <p id="accept-modal-error" class="form-error"></p>
       <div class="row" style="margin-top:12px;">
         <button type="button" id="accept-cancel" class="btn secondary">Cancel</button>
@@ -74,7 +96,12 @@
       </div>
     </div>
   </div>
-
-  <script src="/assets/js/api.js"></script><script src="/assets/js/auth.js"></script><script src="/assets/js/layout.js"></script><script src="/assets/js/transitions.js"></script><script src="/assets/js/pages/reware.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/layout.js"></script>
+  <script src="/assets/js/shell.js"></script>
+  <script src="/assets/js/notifications.js"></script>
+  <script src="/assets/js/transitions.js"></script>
+  <script src="/assets/js/pages/reware.js"></script>
 </body>
 </html>

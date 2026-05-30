@@ -23,7 +23,7 @@ router.put("/me", authMiddleware, (req, res) => {
     return res.status(404).json({ message: "Student not found" });
   }
 
-  const editableFields = ["name", "department", "year", "sem"];
+  const editableFields = ["name", "department", "year", "sem", "phone"];
   editableFields.forEach((field) => {
     if (req.body[field]) {
       db.students[idx][field] = req.body[field];

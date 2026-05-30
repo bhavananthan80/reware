@@ -5,6 +5,15 @@ const crypto = require("crypto");
 const { authMiddleware } = require("../middleware/auth.middleware");
 const { readDb, writeDb } = require("../utils/db");
 const { MEETING_PLACES, isValidMeetingPlace } = require("../utils/meetingPlaces");
+const { ensureChat, normalizeChatDb } = require("../utils/chat");
+const { awardPoints } = require("../utils/points");
+const { notify } = require("../utils/notifications");
+
+function chatIdForRequest(db, requestId) {
+  normalizeChatDb(db);
+  const chat = db.chats.find((c) => c.module === "marketplace" && c.requestId === requestId);
+  return chat ? chat.id : null;
+}
 
 const router = express.Router();
 
@@ -58,6 +67,7 @@ router.get("/", authMiddleware, (req, res) => {
   normalizeDb(db);
   const viewerId = req.user.studentId;
   const listings = db.marketplace
+    .filter((item) => (item.status || "OPEN") === "OPEN")
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .map((item) => enrichListingForViewer(db, item, viewerId));
   res.json(listings);
@@ -84,6 +94,7 @@ router.post("/", authMiddleware, upload.single("image"), (req, res) => {
     createdAt: new Date().toISOString()
   };
   db.marketplace.push(item);
+  awardPoints(db, req.user.studentId, "MARKETPLACE_LIST");
   writeDb(db);
   return res.status(201).json(enrichListingForViewer(db, item, req.user.studentId));
 });
@@ -102,6 +113,8 @@ router.get("/requests/incoming", authMiddleware, (req, res) => {
         ...r,
         buyerName: buyer ? buyer.name : "Unknown",
         buyerEmail: buyer ? buyer.email : "",
+        buyerPhone: buyer ? buyer.phone || "" : "",
+        chatId: chatIdForRequest(db, r.id),
         itemTitle: item ? item.title : "(removed)",
         itemPrice: item ? item.price : null
       };
@@ -122,6 +135,8 @@ router.get("/requests/outgoing", authMiddleware, (req, res) => {
       return {
         ...r,
         sellerName: seller ? seller.name : "Unknown",
+        sellerPhone: seller ? seller.phone || "" : "",
+        chatId: chatIdForRequest(db, r.id),
         itemTitle: item ? item.title : "(removed)",
         itemPrice: item ? item.price : null
       };
@@ -176,8 +191,30 @@ router.patch("/requests/:requestId/accept", authMiddleware, (req, res) => {
     db.marketplace[itemIndex].acceptedRequestId = request.id;
   }
 
+  const chat = ensureChat(db, {
+    module: "marketplace",
+    requestId: request.id,
+    participantIds: [request.sellerId, request.buyerId],
+    itemTitle: item ? item.title : "Marketplace item"
+  });
+  request.chatId = chat.id;
+
+  awardPoints(db, request.sellerId, "MARKETPLACE_SOLD");
+  awardPoints(db, request.buyerId, "MARKETPLACE_BOUGHT");
+  const buyer = studentById(db, request.buyerId);
+  const seller = studentById(db, request.sellerId);
+  const itemTitle = item ? item.title : "your item";
+  notify(db, {
+    userId: request.buyerId,
+    type: "marketplace_accepted",
+    title: "Request accepted",
+    message: `${seller ? seller.name : "Seller"} accepted your request for "${itemTitle}".`,
+    link: `/chat.html?module=marketplace&chat=${chat.id}`,
+    smsBody: `REWARE: Your buy request for "${itemTitle}" was accepted! Open chat: ${chat.id.slice(0, 8)}`
+  });
+
   writeDb(db);
-  res.json(request);
+  res.json({ ...request, chatId: chat.id });
 });
 
 router.patch("/requests/:requestId/reject", authMiddleware, (req, res) => {
@@ -257,6 +294,17 @@ router.post("/:itemId/requests", authMiddleware, (req, res) => {
     updatedAt: now
   };
   db.marketplaceRequests.push(request);
+  awardPoints(db, buyerId, "MARKETPLACE_REQUEST");
+  const buyer = studentById(db, buyerId);
+  const seller = studentById(db, item.ownerId);
+  notify(db, {
+    userId: item.ownerId,
+    type: "marketplace_request",
+    title: "New buy request",
+    message: `${buyer ? buyer.name : "A student"} wants to buy "${item.title}".`,
+    link: "/reware.html",
+    smsBody: `REWARE: ${buyer ? buyer.name : "Someone"} requested your item "${item.title}". Check the app to accept.`
+  });
   writeDb(db);
   res.status(201).json(request);
 });

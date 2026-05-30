@@ -8,10 +8,15 @@ const { normalizeEmail, isValidCollegeEmail } = require("../utils/collegeEmail")
 const router = express.Router();
 
 router.post("/login", (req, res) => {
-  const { email, name, regNo, department, year, sem } = req.body;
+  const { email, name, regNo, department, year, sem, phone } = req.body;
 
-  if (!email || !name || !regNo || !department || !year || !sem) {
-    return res.status(400).json({ message: "All fields are required" });
+  if (!email || !name || !regNo || !department || !year || !sem || !phone) {
+    return res.status(400).json({ message: "All fields are required (including phone number)" });
+  }
+
+  const phoneStr = String(phone).trim();
+  if (phoneStr.length < 8) {
+    return res.status(400).json({ message: "Enter a valid phone number" });
   }
 
   const emailNorm = normalizeEmail(email);
@@ -34,9 +39,18 @@ router.post("/login", (req, res) => {
       department,
       year,
       sem,
+      phone: phoneStr,
       createdAt: new Date().toISOString()
     };
     db.students.push(student);
+    writeDb(db);
+  } else {
+    student.name = name;
+    student.regNo = regNo;
+    student.department = department;
+    student.year = year;
+    student.sem = sem;
+    student.phone = phoneStr;
     writeDb(db);
   }
 

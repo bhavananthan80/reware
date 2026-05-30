@@ -7,9 +7,23 @@ let requestItemId = null;
 let acceptRequestId = null;
 let currentFilter = "all";
 
+let searchQuery = "";
+
 function getFilteredItems() {
-  if (currentFilter === "all") return allItems;
-  return allItems.filter((i) => i.category.toLowerCase().includes(currentFilter));
+  let list = allItems;
+  if (currentFilter !== "all") {
+    list = list.filter((i) => i.category.toLowerCase().includes(currentFilter.toLowerCase()));
+  }
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(
+      (i) =>
+        i.title.toLowerCase().includes(q) ||
+        i.category.toLowerCase().includes(q) ||
+        (i.description || "").toLowerCase().includes(q)
+    );
+  }
+  return list;
 }
 
 function statusClass(status) {
@@ -37,14 +51,14 @@ function renderGrid(items) {
     } else if (mr && mr.status === "PENDING") {
       actionHtml = "<span class='badge' style='background:#fff4e0;color:#8a5a00;'>Request sent</span>";
     } else if (mr && mr.status === "ACCEPTED") {
-      actionHtml = `<div><span class='badge' style='background:#e6f0e5;'>Accepted</span><div class='meet-highlight'>Meet: ${mr.meetingPlace || "—"} at ${mr.meetingTime || "—"}</div></div>`;
+      actionHtml = `<div><span class='badge' style='background:#e6f0e5;'>Accepted</span><div class='meet-highlight'>Meet: ${mr.meetingPlace || "—"} at ${mr.meetingTime || "—"}</div><a class='btn small' href='/chat.html?module=marketplace' data-nav style='margin-top:6px;display:inline-block;'>Open Chat</a></div>`;
     } else if (mr && (mr.status === "REJECTED" || mr.status === "CANCELLED")) {
       actionHtml = `<button type='button' class='btn' data-action='request' data-item-id='${item.id}'>Request again</button>`;
     } else {
       actionHtml = `<button type='button' class='btn' data-action='request' data-item-id='${item.id}'>Request to buy</button>`;
     }
     return `
-    <article class="item-card">
+    <article class="item-card product-card">
       <div class="item-image">${item.imageUrl ? `<img src="${item.imageUrl}" style="width:100%;height:100%;object-fit:cover;" alt="" />` : "📦"}</div>
       <div class="item-content">
         <div class="row"><div class="item-title">${escapeHtml(item.title)}</div><span class="badge">${escapeHtml(item.condition)}</span></div>
@@ -54,6 +68,9 @@ function renderGrid(items) {
     </article>
   `;
   }).join("") || "<p class='muted'>No items listed yet.</p>";
+
+  const countEl = document.getElementById("item-count");
+  if (countEl) countEl.textContent = `Showing ${items.length} open items on your campus`;
 
   grid.querySelectorAll("[data-action='request']").forEach((btn) => {
     btn.addEventListener("click", () => openRequestModal(btn.dataset.itemId));
@@ -77,7 +94,7 @@ function renderIncoming(list) {
     <div class="list-item request-row">
       <div>
         <strong>${escapeHtml(r.itemTitle)}</strong>
-        <div class="muted" style="font-size:13px;">From ${escapeHtml(r.buyerName)} · ₹${escapeHtml(String(r.itemPrice ?? ""))}</div>
+        <div class="muted" style="font-size:13px;">From ${escapeHtml(r.buyerName)} · ${escapeHtml(r.buyerPhone || "No phone")} · ₹${escapeHtml(String(r.itemPrice ?? ""))}</div>
         ${r.message ? `<div style="margin-top:6px;font-size:13px;">"${escapeHtml(r.message)}"</div>` : ""}
       </div>
       <div class="request-actions">
@@ -110,10 +127,11 @@ function renderOutgoing(list) {
       <div>
         <span class="status-pill ${statusClass(r.status)}">${escapeHtml(r.status)}</span>
         <strong style="margin-left:8px;">${escapeHtml(r.itemTitle)}</strong>
-        <div class="muted" style="font-size:13px;">Seller: ${escapeHtml(r.sellerName)} · ₹${escapeHtml(String(r.itemPrice ?? ""))}</div>
+        <div class="muted" style="font-size:13px;">Seller: ${escapeHtml(r.sellerName)} · ${escapeHtml(r.sellerPhone || "No phone")} · ₹${escapeHtml(String(r.itemPrice ?? ""))}</div>
         ${r.status === "ACCEPTED" && r.meetingPlace ? `<div class="meet-highlight">Meet at: ${escapeHtml(r.meetingPlace)} at ${escapeHtml(r.meetingTime || "—")}</div>` : ""}
       </div>
       <div class="request-actions">
+        ${r.status === "ACCEPTED" ? `<a class="btn small" href="/chat.html?module=marketplace&chat=${r.chatId || ""}" data-nav>Open Chat</a>` : ""}
         ${r.status === "PENDING" ? `<button type="button" class="btn secondary small" data-action="cancel-out" data-request-id="${r.id}">Cancel</button>` : ""}
       </div>
     </div>
@@ -194,6 +212,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
+  const searchInput = document.getElementById("market-search");
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      searchQuery = searchInput.value;
+      renderGrid(getFilteredItems());
+    });
+  }
+
   document.getElementById("market-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     const form = event.target;
@@ -240,12 +266,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       return; 
     }
     try {
-      await api(`/api/marketplace/requests/${acceptRequestId}/accept`, {
+      const accepted = await api(`/api/marketplace/requests/${acceptRequestId}/accept`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ meetingPlace, meetingTime })
       });
       closeAcceptModal();
+      if (accepted.chatId) {
+        window.location.href = `/chat.html?module=marketplace&chat=${accepted.chatId}`;
+        return;
+      }
       await refreshLists();
     } catch (e) {
       errEl.textContent = e.message || "Failed";
