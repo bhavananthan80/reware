@@ -193,7 +193,8 @@ async function refreshLists() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  document.getElementById("logout-link").addEventListener("click", logout);
+  const logoutBtn = document.getElementById("logout-link");
+  if (logoutBtn) logoutBtn.addEventListener("click", logout);
   document.getElementById("toggle-upload").addEventListener("click", () => {
     const panel = document.getElementById("upload-panel");
     panel.style.display = panel.style.display === "none" ? "block" : "none";

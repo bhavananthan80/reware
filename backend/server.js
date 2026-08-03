@@ -14,12 +14,15 @@ const chatRoutes = require("./routes/chat.routes");
 const pointsRoutes = require("./routes/points.routes");
 const notificationsRoutes = require("./routes/notifications.routes");
 
+const os = require("os");
+
 const app = express();
 const preferredPort = Number(process.env.PORT) || 4000;
 
 app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(os.tmpdir()));
 
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, service: "REWARE CampusCycle" });

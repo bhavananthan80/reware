@@ -115,6 +115,9 @@
   <script src="/assets/js/api.js"></script>
   <script src="/assets/js/auth.js"></script>
   <script>
+    if (localStorage.getItem("rewareToken")) {
+      window.location.href = "/dashboard.html";
+    }
     document.getElementById("login-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);

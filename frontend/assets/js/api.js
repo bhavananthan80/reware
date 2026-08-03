@@ -10,6 +10,14 @@ async function api(path, options = {}) {
     headers
   });
 
+  if (response.status === 401) {
+    localStorage.removeItem("rewareToken");
+    localStorage.removeItem("rewareStudent");
+    if (!window.location.pathname.endsWith("index.html") && window.location.pathname !== "/") {
+      window.location.href = "/index.html";
+    }
+  }
+
   if (!response.ok) {
     let message = "Request failed";
     try {
