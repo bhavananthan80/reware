@@ -79,27 +79,32 @@ function findFreePort(startPort, maxTries) {
   });
 }
 
-(async () => {
-  try {
-    const port = await findFreePort(preferredPort, 30);
-    server.listen(port, () => {
-      const url = `http://localhost:${port}`;
-      console.log("");
-      console.log("================================================");
-      console.log(`  REWARE is running — open this in your browser:`);
-      console.log(`  ${url}`);
-      console.log("================================================");
-      console.log("");
-      if (port !== preferredPort) {
-        console.log(`  Note: Port ${preferredPort} was busy, so ${port} was used instead.`);
+if (require.main === module) {
+  (async () => {
+    try {
+      const port = await findFreePort(preferredPort, 30);
+      server.listen(port, () => {
+        const url = `http://localhost:${port}`;
         console.log("");
-      }
-      console.log("  Keep THIS window open while you use the site.");
-      console.log("  Test: " + url + "/api/health  should show {\"ok\":true,...}");
-      console.log("");
-    });
-  } catch (e) {
-    console.error(e.message || e);
-    process.exit(1);
-  }
-})();
+        console.log("================================================");
+        console.log(`  REWARE is running — open this in your browser:`);
+        console.log(`  ${url}`);
+        console.log("================================================");
+        console.log("");
+        if (port !== preferredPort) {
+          console.log(`  Note: Port ${preferredPort} was busy, so ${port} was used instead.`);
+          console.log("");
+        }
+        console.log("  Keep THIS window open while you use the site.");
+        console.log("  Test: " + url + "/api/health  should show {\"ok\":true,...}");
+        console.log("");
+      });
+    } catch (e) {
+      console.error(e.message || e);
+      process.exit(1);
+    }
+  })();
+}
+
+module.exports = app;
+
