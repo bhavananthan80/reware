@@ -1,18 +1,11 @@
 const express = require("express");
-const multer = require("multer");
-const path = require("path");
 const crypto = require("crypto");
 const { authMiddleware } = require("../middleware/auth.middleware");
 const { readDb, writeDb } = require("../utils/db");
 const { awardPoints } = require("../utils/points");
+const upload = require("../utils/upload");
 
 const router = express.Router();
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, path.join(__dirname, "../uploads")),
-  filename: (_req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
-});
-const upload = multer({ storage });
 
 router.get("/", authMiddleware, (req, res) => {
   const db = readDb();

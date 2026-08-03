@@ -38,8 +38,8 @@ function listTemplate(items) {
     return `<div class="lf-entry-card">
       <div>
         <span class="product-badge" style="position:static;display:inline-block;margin-bottom:6px;">${typeBadge}</span>
-        <strong>${escapeHtml(entry.itemName)}</strong>
-        <div class="muted" style="font-size:13px;">📍 ${escapeHtml(entry.location)} · ${escapeHtml(entry.time || "No time")}</div>
+        <strong>${escapeHtml(entry.itemName || "")}</strong>
+        <div class="muted" style="font-size:13px;">📍 ${escapeHtml(entry.location || "")} · ${escapeHtml(entry.time || "No time")}</div>
       </div>
       <div>${actionBtn}</div>
     </div>`;
@@ -48,6 +48,7 @@ function listTemplate(items) {
 
 function fillAcceptLfSelect() {
   const sel = document.getElementById("accept-lf-meeting-place");
+  if (!sel) return;
   sel.innerHTML = meetingPlaces.map((p) => {
     const opt = document.createElement("option");
     opt.value = p;
@@ -58,27 +59,31 @@ function fillAcceptLfSelect() {
 
 function openAcceptLfModal(req) {
   acceptLfRequestId = req.id;
-  document.getElementById("accept-lf-summary").textContent =
-    `${req.requesterName} · ${req.itemTitle}`;
-  document.getElementById("accept-lf-modal-error").textContent = "";
+  const summary = document.getElementById("accept-lf-summary");
+  if (summary) summary.textContent = `${req.requesterName || "User"} · ${req.itemTitle || "Item"}`;
+  const errEl = document.getElementById("accept-lf-modal-error");
+  if (errEl) errEl.textContent = "";
   fillAcceptLfSelect();
   const placeSel = document.getElementById("accept-lf-meeting-place");
   const timeInput = document.getElementById("accept-lf-meeting-time");
-  if (req.meetingPlace && meetingPlaces.includes(req.meetingPlace)) {
+  if (placeSel && req.meetingPlace && meetingPlaces.includes(req.meetingPlace)) {
     placeSel.value = req.meetingPlace;
   }
-  timeInput.value = req.meetingTime || "";
-  document.getElementById("accept-lf-modal").style.display = "flex";
+  if (timeInput) timeInput.value = req.meetingTime || "";
+  const modal = document.getElementById("accept-lf-modal");
+  if (modal) modal.style.display = "flex";
 }
 
 function closeAcceptLfModal() {
   acceptLfRequestId = null;
-  document.getElementById("accept-lf-modal").style.display = "none";
+  const modal = document.getElementById("accept-lf-modal");
+  if (modal) modal.style.display = "none";
 }
 
 function renderIncoming(list) {
   const el = document.getElementById("incoming-requests");
-  const pending = list.filter((r) => r.status === "PENDING");
+  if (!el) return;
+  const pending = (list || []).filter((r) => r.status === "PENDING");
   if (!pending.length) {
     el.innerHTML = "<p class='muted'>No pending incoming requests.</p>";
     return;
@@ -115,7 +120,8 @@ function renderIncoming(list) {
 
 function renderOutgoing(list) {
   const el = document.getElementById("outgoing-requests");
-  if (!list.length) {
+  if (!el) return;
+  if (!(list || []).length) {
     el.innerHTML = "<p class='muted'>You have not sent any requests yet.</p>";
     return;
   }
@@ -151,27 +157,33 @@ function renderOutgoing(list) {
 
 function fillMeetingSelect() {
   const sel = document.getElementById("request-meeting-place");
-  sel.innerHTML = meetingPlaces.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
+  if (sel) sel.innerHTML = meetingPlaces.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
 }
 
 function openRequestModal(itemId) {
   const item = allItems.find((i) => i.id === itemId);
   requestItemId = itemId;
-  document.getElementById("request-item-title").textContent = item ? item.itemName : "";
-  document.getElementById("request-message").value = "";
-  document.getElementById("request-meeting-time").value = "";
-  document.getElementById("request-modal-error").textContent = "";
+  const titleEl = document.getElementById("request-item-title");
+  if (titleEl) titleEl.textContent = item ? item.itemName : "";
+  const msgInput = document.getElementById("request-message");
+  if (msgInput) msgInput.value = "";
+  const timeInput = document.getElementById("request-meeting-time");
+  if (timeInput) timeInput.value = "";
+  const errEl = document.getElementById("request-modal-error");
+  if (errEl) errEl.textContent = "";
   fillMeetingSelect();
-  document.getElementById("request-modal").style.display = "flex";
+  const modal = document.getElementById("request-modal");
+  if (modal) modal.style.display = "flex";
 }
 
 function closeRequestModal() {
   requestItemId = null;
-  document.getElementById("request-modal").style.display = "none";
+  const modal = document.getElementById("request-modal");
+  if (modal) modal.style.display = "none";
 }
 
 function applyLfFilters(data) {
-  let list = data;
+  let list = data || [];
   if (lfFilter === "lost") list = list.filter((i) => i.type === "lost");
   if (lfFilter === "found") list = list.filter((i) => i.type === "found");
   if (lfSearch) {
@@ -187,18 +199,20 @@ function applyLfFilters(data) {
 
 async function refresh() {
   const [data, incoming, outgoing] = await Promise.all([
-    api("/api/lostfound"),
-    api("/api/lostfound/requests/incoming"),
-    api("/api/lostfound/requests/outgoing")
+    api("/api/lostfound").catch(() => []),
+    api("/api/lostfound/requests/incoming").catch(() => []),
+    api("/api/lostfound/requests/outgoing").catch(() => [])
   ]);
 
-  allItems = data;
-  const filtered = applyLfFilters(data);
+  allItems = data || [];
+  const filtered = applyLfFilters(allItems);
   const countEl = document.getElementById("lf-count");
   if (countEl) countEl.textContent = `Showing ${filtered.length} open reports on campus`;
 
-  document.getElementById("lost-list").innerHTML = listTemplate(filtered.filter((i) => i.type === "lost"));
-  document.getElementById("found-list").innerHTML = listTemplate(filtered.filter((i) => i.type === "found"));
+  const lostList = document.getElementById("lost-list");
+  if (lostList) lostList.innerHTML = listTemplate(filtered.filter((i) => i.type === "lost"));
+  const foundList = document.getElementById("found-list");
+  if (foundList) foundList.innerHTML = listTemplate(filtered.filter((i) => i.type === "found"));
 
   document.querySelectorAll(".request-btn").forEach((btn) => {
     btn.addEventListener("click", () => openRequestModal(btn.dataset.id));
@@ -209,106 +223,143 @@ async function refresh() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  currentUser = await api("/api/users/me");
-  meetingPlaces = await api("/api/marketplace/meeting-places");
+  try {
+    currentUser = await api("/api/users/me").catch(() => null);
+    meetingPlaces = await api("/api/marketplace/meeting-places").catch(() => []);
 
-  await refresh();
+    await refresh();
 
-  const lfSearchInput = document.getElementById("lf-search");
-  if (lfSearchInput) {
-    lfSearchInput.addEventListener("input", () => {
-      lfSearch = lfSearchInput.value;
-      const filtered = applyLfFilters(allItems);
-      document.getElementById("lost-list").innerHTML = listTemplate(filtered.filter((i) => i.type === "lost"));
-      document.getElementById("found-list").innerHTML = listTemplate(filtered.filter((i) => i.type === "found"));
-      const countEl = document.getElementById("lf-count");
-      if (countEl) countEl.textContent = `Showing ${filtered.length} open reports on campus`;
-    });
-  }
-
-  document.querySelectorAll("[data-lf-filter]").forEach((chip) => {
-    chip.addEventListener("click", async () => {
-      document.querySelectorAll("[data-lf-filter]").forEach((c) => c.classList.remove("active"));
-      chip.classList.add("active");
-      lfFilter = chip.dataset.lfFilter;
-      await refresh();
-    });
-  });
-
-  async function bindForm(formId, endpoint) {
-    document.getElementById(formId).addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const data = new FormData(event.target);
-      await api(endpoint, { method: "POST", body: data });
-      event.target.reset();
-      await refresh();
-    });
-  }
-
-  await bindForm("lost-form", "/api/lostfound/lost");
-  await bindForm("found-form", "/api/lostfound/found");
-
-  document.getElementById("request-cancel").addEventListener("click", closeRequestModal);
-  document.getElementById("request-modal").addEventListener("click", (e) => {
-    if (e.target.id === "request-modal") closeRequestModal();
-  });
-
-  document.getElementById("request-submit").addEventListener("click", async () => {
-    const errEl = document.getElementById("request-modal-error");
-    errEl.textContent = "";
-    if (!requestItemId) return;
-
-    const message = document.getElementById("request-message").value;
-    const meetingPlace = document.getElementById("request-meeting-place").value;
-    const meetingTime = document.getElementById("request-meeting-time").value;
-
-    if (!meetingPlace || !meetingTime) {
-      errEl.textContent = "Please specify a meeting place and time.";
-      return;
-    }
-
-    try {
-      await api(`/api/lostfound/${requestItemId}/requests`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, meetingPlace, meetingTime })
+    const lfSearchInput = document.getElementById("lf-search");
+    if (lfSearchInput) {
+      lfSearchInput.addEventListener("input", () => {
+        lfSearch = lfSearchInput.value;
+        const filtered = applyLfFilters(allItems);
+        const lostList = document.getElementById("lost-list");
+        if (lostList) lostList.innerHTML = listTemplate(filtered.filter((i) => i.type === "lost"));
+        const foundList = document.getElementById("found-list");
+        if (foundList) foundList.innerHTML = listTemplate(filtered.filter((i) => i.type === "found"));
+        const countEl = document.getElementById("lf-count");
+        if (countEl) countEl.textContent = `Showing ${filtered.length} open reports on campus`;
       });
-      closeRequestModal();
-      await refresh();
-    } catch (e) {
-      errEl.textContent = e.message || "Failed";
     }
-  });
 
-  document.getElementById("accept-lf-cancel").addEventListener("click", closeAcceptLfModal);
-  document.getElementById("accept-lf-modal").addEventListener("click", (e) => {
-    if (e.target.id === "accept-lf-modal") closeAcceptLfModal();
-  });
-
-  document.getElementById("accept-lf-submit").addEventListener("click", async () => {
-    const errEl = document.getElementById("accept-lf-modal-error");
-    errEl.textContent = "";
-    if (!acceptLfRequestId) return;
-    const meetingPlace = document.getElementById("accept-lf-meeting-place").value;
-    const meetingTime = document.getElementById("accept-lf-meeting-time").value;
-    if (!meetingTime) {
-      errEl.textContent = "Please set a final meeting time.";
-      return;
-    }
-    try {
-      const accepted = await api(`/api/lostfound/requests/${acceptLfRequestId}/accept`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ meetingPlace, meetingTime })
+    document.querySelectorAll("[data-lf-filter]").forEach((chip) => {
+      chip.addEventListener("click", async () => {
+        document.querySelectorAll("[data-lf-filter]").forEach((c) => c.classList.remove("active"));
+        chip.classList.add("active");
+        lfFilter = chip.dataset.lfFilter;
+        await refresh();
       });
-      closeAcceptLfModal();
-      if (accepted.chatId) {
-        window.location.href = `/chat.html?module=lostfound&chat=${accepted.chatId}`;
-        return;
-      }
-      await refresh();
-    } catch (e) {
-      errEl.textContent = e.message || "Failed";
+    });
+
+    function bindForm(formId, endpoint) {
+      const f = document.getElementById(formId);
+      if (!f) return;
+      f.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const submitBtn = f.querySelector("button[type='submit']");
+        const origText = submitBtn ? submitBtn.textContent : "Submit";
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Posting...";
+        }
+        try {
+          const data = new FormData(event.target);
+          await api(endpoint, { method: "POST", body: data });
+          event.target.reset();
+          await refresh();
+        } catch (err) {
+          alert(err.message || "Failed to submit report.");
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = origText;
+          }
+        }
+      });
     }
-  });
+
+    bindForm("lost-form", "/api/lostfound/lost");
+    bindForm("found-form", "/api/lostfound/found");
+
+    const reqCancel = document.getElementById("request-cancel");
+    if (reqCancel) reqCancel.addEventListener("click", closeRequestModal);
+    const reqModal = document.getElementById("request-modal");
+    if (reqModal) {
+      reqModal.addEventListener("click", (e) => {
+        if (e.target.id === "request-modal") closeRequestModal();
+      });
+    }
+
+    const reqSubmit = document.getElementById("request-submit");
+    if (reqSubmit) {
+      reqSubmit.addEventListener("click", async () => {
+        const errEl = document.getElementById("request-modal-error");
+        if (errEl) errEl.textContent = "";
+        if (!requestItemId) return;
+
+        const message = document.getElementById("request-message").value;
+        const meetingPlace = document.getElementById("request-meeting-place").value;
+        const meetingTime = document.getElementById("request-meeting-time").value;
+
+        if (!meetingPlace || !meetingTime) {
+          if (errEl) errEl.textContent = "Please specify a meeting place and time.";
+          return;
+        }
+
+        try {
+          await api(`/api/lostfound/${requestItemId}/requests`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message, meetingPlace, meetingTime })
+          });
+          closeRequestModal();
+          await refresh();
+        } catch (e) {
+          if (errEl) errEl.textContent = e.message || "Failed";
+        }
+      });
+    }
+
+    const acceptCancel = document.getElementById("accept-lf-cancel");
+    if (acceptCancel) acceptCancel.addEventListener("click", closeAcceptLfModal);
+    const acceptModal = document.getElementById("accept-lf-modal");
+    if (acceptModal) {
+      acceptModal.addEventListener("click", (e) => {
+        if (e.target.id === "accept-lf-modal") closeAcceptLfModal();
+      });
+    }
+
+    const acceptSubmit = document.getElementById("accept-lf-submit");
+    if (acceptSubmit) {
+      acceptSubmit.addEventListener("click", async () => {
+        const errEl = document.getElementById("accept-lf-modal-error");
+        if (errEl) errEl.textContent = "";
+        if (!acceptLfRequestId) return;
+        const meetingPlace = document.getElementById("accept-lf-meeting-place").value;
+        const meetingTime = document.getElementById("accept-lf-meeting-time").value;
+        if (!meetingTime) {
+          if (errEl) errEl.textContent = "Please set a final meeting time.";
+          return;
+        }
+        try {
+          const accepted = await api(`/api/lostfound/requests/${acceptLfRequestId}/accept`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ meetingPlace, meetingTime })
+          });
+          closeAcceptLfModal();
+          if (accepted.chatId) {
+            window.location.href = `/chat.html?module=lostfound&chat=${accepted.chatId}`;
+            return;
+          }
+          await refresh();
+        } catch (e) {
+          if (errEl) errEl.textContent = e.message || "Failed";
+        }
+      });
+    }
+  } catch (err) {
+    console.error("Lost found load error:", err);
+  }
 });

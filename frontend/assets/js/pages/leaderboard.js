@@ -8,44 +8,55 @@ function medal(rank) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const [board, me] = await Promise.all([
-    api("/api/points/leaderboard"),
-    api("/api/points/me")
-  ]);
+  try {
+    const [board, me] = await Promise.all([
+      api("/api/points/leaderboard").catch(() => ({ leaderboard: [] })),
+      api("/api/points/me").catch(() => ({ sustainabilityPoints: 0, carbonSavedKg: 0, rank: null, certificateThreshold: 100, certificates: [] }))
+    ]);
 
-  const ptsToCert = Math.max(0, me.certificateThreshold - me.sustainabilityPoints);
-  const certLinks = me.certificates.length
-    ? me.certificates.map((c) => `<a class="btn" data-nav href="/certificate.html?id=${c.id}">View certificate</a>`).join(" ")
-    : `<span class="muted">${ptsToCert} pts until auto-certificate</span>`;
+    const statsEl = document.getElementById("my-stats");
+    if (statsEl) {
+      const ptsToCert = Math.max(0, (me.certificateThreshold || 100) - (me.sustainabilityPoints || 0));
+      const certLinks = (me.certificates || []).length
+        ? me.certificates.map((c) => `<a class="btn" data-nav href="/certificate.html?id=${c.id}">View certificate</a>`).join(" ")
+        : `<span class="muted">${ptsToCert} pts until auto-certificate</span>`;
 
-  document.getElementById("my-stats").innerHTML = `
-    <div class="row" style="flex-wrap:wrap;gap:16px;">
-      <div><div class="metric-value" style="font-size:32px;">${me.sustainabilityPoints}</div><div class="muted">Your points</div></div>
-      <div><div class="metric-value" style="font-size:32px;">${me.carbonSavedKg} kg</div><div class="muted">CO₂ avoided (est.)</div></div>
-      <div><div class="metric-value" style="font-size:32px;">#${me.rank || "—"}</div><div class="muted">Campus rank</div></div>
-      <div>${certLinks}</div>
-    </div>
-  `;
+      statsEl.innerHTML = `
+        <div class="row" style="flex-wrap:wrap;gap:16px;">
+          <div><div class="metric-value" style="font-size:32px;">${me.sustainabilityPoints || 0}</div><div class="muted">Your points</div></div>
+          <div><div class="metric-value" style="font-size:32px;">${me.carbonSavedKg || 0} kg</div><div class="muted">CO₂ avoided (est.)</div></div>
+          <div><div class="metric-value" style="font-size:32px;">#${me.rank || "—"}</div><div class="muted">Campus rank</div></div>
+          <div>${certLinks}</div>
+        </div>
+      `;
+    }
 
-  const student = JSON.parse(localStorage.getItem("rewareStudent") || "{}");
-  const rows = board.leaderboard
-    .map(
-      (r) => `
-    <tr class="${r.id === student.id ? "highlight" : ""}">
-      <td class="rank-medal">${medal(r.rank)}</td>
-      <td>${r.name}</td>
-      <td>${r.department || "—"}</td>
-      <td><strong>${r.sustainabilityPoints}</strong></td>
-      <td>${r.carbonSavedKg} kg</td>
-    </tr>
-  `
-    )
-    .join("");
+    const student = JSON.parse(localStorage.getItem("rewareStudent") || "{}");
+    const leaderboardData = (board && board.leaderboard) || [];
+    const rows = leaderboardData
+      .map(
+        (r) => `
+      <tr class="${r.id === student.id ? "highlight" : ""}">
+        <td class="rank-medal">${medal(r.rank)}</td>
+        <td>${r.name || "Student"}</td>
+        <td>${r.department || "—"}</td>
+        <td><strong>${r.sustainabilityPoints || 0}</strong></td>
+        <td>${r.carbonSavedKg || 0} kg</td>
+      </tr>
+    `
+      )
+      .join("");
 
-  document.getElementById("leaderboard-table").innerHTML = `
-    <table class="leaderboard-table">
-      <thead><tr><th>Rank</th><th>Student</th><th>Department</th><th>Points</th><th>CO₂ saved</th></tr></thead>
-      <tbody>${rows || "<tr><td colspan='5'>No rankings yet.</td></tr>"}</tbody>
-    </table>
-  `;
+    const tableEl = document.getElementById("leaderboard-table");
+    if (tableEl) {
+      tableEl.innerHTML = `
+        <table class="leaderboard-table">
+          <thead><tr><th>Rank</th><th>Student</th><th>Department</th><th>Points</th><th>CO₂ saved</th></tr></thead>
+          <tbody>${rows || "<tr><td colspan='5'>No rankings yet.</td></tr>"}</tbody>
+        </table>
+      `;
+    }
+  } catch (err) {
+    console.error("Leaderboard error:", err);
+  }
 });

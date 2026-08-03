@@ -11,7 +11,7 @@ function escapeHtml(s) {
 }
 
 function filterResources(items) {
-  let list = items;
+  let list = items || [];
   if (typeFilter !== "all") {
     list = list.filter((r) => {
       const t = (r.type || "").toLowerCase();
@@ -29,29 +29,35 @@ function render(items) {
   const countEl = document.getElementById("resource-count");
   if (countEl) countEl.textContent = `Showing ${filtered.length} resources on your campus`;
 
-  document.getElementById("resource-grid").innerHTML = filtered
+  const grid = document.getElementById("resource-grid");
+  if (!grid) return;
+  grid.innerHTML = filtered
     .map(
       (res) => `
     <article class="item-card product-card resource-card">
-      <div class="item-image">📘<span class="product-badge">${escapeHtml(res.type)}</span></div>
+      <div class="item-image">📘<span class="product-badge">${escapeHtml(res.type || "Resource")}</span></div>
       <div class="item-content">
-        <div class="product-cat">${escapeHtml(res.department)} · Sem ${escapeHtml(String(res.sem))}</div>
-        <div class="item-title">${escapeHtml(res.title)}</div>
+        <div class="product-cat">${escapeHtml(res.department || "General")} · Sem ${escapeHtml(String(res.sem || "-"))}</div>
+        <div class="item-title">${escapeHtml(res.title || "Untitled")}</div>
         <div class="row" style="margin-top:10px;">
-          ${res.fileUrl ? `<a class="btn" href="${res.fileUrl}" target="_blank" rel="noopener">Download</a>` : `<span class="muted">No file</span>`}
+          ${res.fileUrl ? `<a class="btn" href="${res.fileUrl}" target="_blank" rel="noopener">Download File</a>` : `<span class="muted">No file attached</span>`}
         </div>
       </div>
     </article>
   `
     )
-    .join("") || "<p class='muted'>No resources match your search.</p>";
+    .join("") || "<p class='muted'>No academic resources match your search.</p>";
 }
 
 async function loadResources(query) {
-  const q = (query || "").trim();
-  const path = q ? `/api/resources?q=${encodeURIComponent(q)}` : "/api/resources";
-  allResources = await api(path);
-  render(allResources);
+  try {
+    const q = (query || "").trim();
+    const path = q ? `/api/resources?q=${encodeURIComponent(q)}` : "/api/resources";
+    allResources = (await api(path).catch(() => [])) || [];
+    render(allResources);
+  } catch (err) {
+    console.error("Load resources error:", err);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -59,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (toggle) {
     toggle.addEventListener("click", () => {
       const panel = document.getElementById("upload-panel");
-      panel.style.display = panel.style.display === "none" ? "block" : "none";
+      if (panel) panel.style.display = panel.style.display === "none" ? "block" : "none";
     });
   }
 
@@ -82,13 +88,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  document.getElementById("resource-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const data = new FormData(event.target);
-    await api("/api/resources", { method: "POST", body: data });
-    event.target.reset();
-    document.getElementById("upload-panel").style.display = "none";
-    await loadResources(searchInput ? searchInput.value : "");
-  });
+  const form = document.getElementById("resource-form");
+  if (form) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const submitBtn = form.querySelector("button[type='submit']");
+      const origText = submitBtn ? submitBtn.textContent : "Upload";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Uploading...";
+      }
+      try {
+        const data = new FormData(event.target);
+        await api("/api/resources", { method: "POST", body: data });
+        event.target.reset();
+        const panel = document.getElementById("upload-panel");
+        if (panel) panel.style.display = "none";
+        await loadResources(searchInput ? searchInput.value : "");
+      } catch (err) {
+        alert(err.message || "Upload failed. Please check your fields and file.");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = origText;
+        }
+      }
+    });
+  }
 });
-

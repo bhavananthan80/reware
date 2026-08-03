@@ -1,6 +1,7 @@
 const express = require("express");
 const { readDb, writeDb } = require("../utils/db");
 const { authMiddleware } = require("../middleware/auth.middleware");
+const upload = require("../utils/upload");
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.get("/me", authMiddleware, (req, res) => {
   return res.json(student);
 });
 
-router.put("/me", authMiddleware, (req, res) => {
+router.put("/me", authMiddleware, upload.single("avatar"), (req, res) => {
   const db = readDb();
   const idx = db.students.findIndex((item) => item.id === req.user.studentId);
 
@@ -25,10 +26,14 @@ router.put("/me", authMiddleware, (req, res) => {
 
   const editableFields = ["name", "department", "year", "sem", "phone"];
   editableFields.forEach((field) => {
-    if (req.body[field]) {
+    if (req.body && req.body[field] !== undefined) {
       db.students[idx][field] = req.body[field];
     }
   });
+
+  if (req.file) {
+    db.students[idx].avatarUrl = `/uploads/${req.file.filename}`;
+  }
 
   writeDb(db);
   return res.json(db.students[idx]);

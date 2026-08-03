@@ -221,14 +221,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  document.getElementById("market-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const form = event.target;
-    const data = new FormData(form);
-    await api("/api/marketplace", { method: "POST", body: data });
-    form.reset();
-    await refreshLists();
-  });
+  const marketForm = document.getElementById("market-form");
+  if (marketForm) {
+    marketForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const submitBtn = marketForm.querySelector("button[type='submit']");
+      const origText = submitBtn ? submitBtn.textContent : "Upload Item";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Uploading...";
+      }
+      try {
+        const form = event.target;
+        const data = new FormData(form);
+        await api("/api/marketplace", { method: "POST", body: data });
+        form.reset();
+        const panel = document.getElementById("upload-panel");
+        if (panel) panel.style.display = "none";
+        await refreshLists();
+      } catch (err) {
+        alert(err.message || "Failed to list item. Please check required fields.");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = origText;
+        }
+      }
+    });
+  }
 
   document.getElementById("request-cancel").addEventListener("click", closeRequestModal);
   document.getElementById("request-modal").addEventListener("click", (e) => {
